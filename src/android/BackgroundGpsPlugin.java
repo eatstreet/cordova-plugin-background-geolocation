@@ -59,7 +59,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
             if (params == null || headers == null || url == null) {
                 callbackContext.error("Call configure before calling start");
             } else {
-                callbackContext.success();
+                // callbackContext.success();
                 updateServiceIntent.putExtra("url", url);
                 updateServiceIntent.putExtra("params", params);
                 updateServiceIntent.putExtra("headers", headers);
@@ -80,7 +80,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
             isEnabled = false;
             result = true;
             activity.stopService(updateServiceIntent);
-            callback.success();
+            // callback.success();
         } else if (ACTION_CONFIGURE.equalsIgnoreCase(action)) {
             result = true;
             try {
@@ -104,7 +104,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         } else if (ACTION_SET_CONFIG.equalsIgnoreCase(action)) {
             result = true;
             // TODO reconfigure Service
-            callback.success();
+            // callback.success();
         }
 
         return result;
