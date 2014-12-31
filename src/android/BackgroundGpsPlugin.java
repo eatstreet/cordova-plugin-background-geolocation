@@ -53,13 +53,15 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         Boolean result = false;
         updateServiceIntent = new Intent(activity, LocationUpdateService.class);
         this.callback = callbackContext;
-
+        
         if (ACTION_START.equalsIgnoreCase(action) && !isEnabled) {
             result = true;
             if (params == null || headers == null || url == null) {
                 callbackContext.error("Call configure before calling start");
             } else {
                 // callbackContext.success();
+
+
                 updateServiceIntent.putExtra("url", url);
                 updateServiceIntent.putExtra("params", params);
                 updateServiceIntent.putExtra("headers", headers);
@@ -80,7 +82,8 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
             isEnabled = false;
             result = true;
             activity.stopService(updateServiceIntent);
-            // callback.success();
+            this.callback = null;
+            
         } else if (ACTION_CONFIGURE.equalsIgnoreCase(action)) {
             result = true;
             try {
@@ -104,7 +107,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         } else if (ACTION_SET_CONFIG.equalsIgnoreCase(action)) {
             result = true;
             // TODO reconfigure Service
-            // callback.success();
+            //callback.success();
         }
 
         return result;
