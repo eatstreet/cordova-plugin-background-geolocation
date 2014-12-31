@@ -48,6 +48,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     }
 
     public boolean execute(String action, JSONArray data, CallbackContext callbackContext) {
+        Log.d(TAG, "execute / action : " + action);
         Activity activity = this.cordova.getActivity();
         Boolean result = false;
         updateServiceIntent = new Intent(activity, LocationUpdateService.class);
@@ -79,7 +80,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
             isEnabled = false;
             result = true;
             activity.stopService(updateServiceIntent);
-            callbackContext.success();
+            callback.success();
         } else if (ACTION_CONFIGURE.equalsIgnoreCase(action)) {
             result = true;
             try {
@@ -103,7 +104,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         } else if (ACTION_SET_CONFIG.equalsIgnoreCase(action)) {
             result = true;
             // TODO reconfigure Service
-            callbackContext.success();
+            callback.success();
         }
 
         return result;
@@ -122,9 +123,9 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     }
 
     public void onEventMainThread(JSONObject loc){
-        Log.d("BUS",loc.toString());
-        PluginResult result = new PluginResult(PluginResult.Status.OK, loc);
+        Log.d("BUS received : ",loc.toString());
         result.setKeepCallback(true);
+        PluginResult result = new PluginResult(PluginResult.Status.OK, loc);
         callback.sendPluginResult(result);
     }
 }
