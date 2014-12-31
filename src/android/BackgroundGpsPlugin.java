@@ -122,6 +122,6 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
 
     public void onEventMainThread(JSONObject loc){
         Log.d("BUS",loc.toString());
-        callbackContext.success(loc);
+        callback.success(loc);
     }
 }
