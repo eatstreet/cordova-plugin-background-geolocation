@@ -38,6 +38,8 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     private String notificationText = "ENABLED";
     private String stopOnTerminate = "false";
 
+    private CallbackContext callback;
+
     @Override
     protected void pluginInitialize() {
         Log.d("BUS","registering");
@@ -48,6 +50,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
         Activity activity = this.cordova.getActivity();
         Boolean result = false;
         updateServiceIntent = new Intent(activity, LocationUpdateService.class);
+        this.callback = callbackContext;
 
         if (ACTION_START.equalsIgnoreCase(action) && !isEnabled) {
             result = true;
@@ -119,5 +122,6 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
 
     public void onEventMainThread(JSONObject loc){
         Log.d("BUS",loc.toString());
+        callbackContext.success(loc);
     }
 }
