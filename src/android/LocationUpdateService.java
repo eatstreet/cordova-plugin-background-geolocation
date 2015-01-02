@@ -34,6 +34,8 @@ import static java.lang.Math.*;
 
 public class LocationUpdateService extends Service implements LocationListener {
     private static final String TAG = "LocationUpdateService";
+
+    private static final int TWO_MINUTES = 1000 * 60 * 2;
     
     private Location lastLocation;
 
@@ -159,20 +161,20 @@ public class LocationUpdateService extends Service implements LocationListener {
 
         locationManager.removeUpdates(this);
 
-        final Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setAltitudeRequired(false);
-        criteria.setBearingRequired(false);
-        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+        // final Criteria criteria = new Criteria();
+        // criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        // criteria.setAltitudeRequired(false);
+        // criteria.setBearingRequired(false);
+        // criteria.setPowerRequirement(Criteria.POWER_HIGH);
 
-        final String bestProvider = manager.getBestProvider(criteria, true);
+        // final String bestProvider = manager.getBestProvider(criteria, true);
 
-        if (bestProvider != null) {
-            Log.d(TAG, "bestProvider found");
-            manager.requestLocationUpdates(bestProvider, 0, 0, listener);
-        }else{
-            Log.d(TAG, "bestProvider not found");
-        }
+        // if (bestProvider != null) {
+        //     Log.d(TAG, "bestProvider found");
+        //     manager.requestLocationUpdates(bestProvider, 0, 0, listener);
+        // }else{
+        //     Log.d(TAG, "bestProvider not found");
+        // }
             
         // Turn on each provider aggressively 
         // List<String> matchingProviders = locationManager.getAllProviders();
@@ -181,11 +183,67 @@ public class LocationUpdateService extends Service implements LocationListener {
         //         locationManager.requestLocationUpdates(provider, 0, 0, this);
         //     }
         // }
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
 
     private void cleanUp() {
         locationManager.removeUpdates(this);
         stopForeground(true);
+    }
+
+     /** Determines whether one Location reading is better than the current Location fix
+      * @param location  The new Location that you want to evaluate
+      * @param currentBestLocation  The current Location fix, to which you want to compare the new one
+      */
+    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+        if (currentBestLocation == null) {
+            // A new location is always better than no location
+            return true;
+        }
+
+        // Check whether the new location fix is newer or older
+        long timeDelta = location.getTime() - currentBestLocation.getTime();
+        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
+        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+        boolean isNewer = timeDelta > 0;
+
+        // If it's been more than two minutes since the current location, use the new location
+        // because the user has likely moved
+        if (isSignificantlyNewer) {
+            return true;
+        // If the new location is more than two minutes older, it must be worse
+        } else if (isSignificantlyOlder) {
+            return false;
+        }
+
+        // Check whether the new location fix is more or less accurate
+        int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+        boolean isLessAccurate = accuracyDelta > 0;
+        boolean isMoreAccurate = accuracyDelta < 0;
+        boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+        // Check if the old and new location are from the same provider
+        boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                currentBestLocation.getProvider());
+
+        // Determine location quality using a combination of timeliness and accuracy
+        if (isMoreAccurate) {
+            return true;
+        } else if (isNewer && !isLessAccurate) {
+            return true;
+        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Checks whether two providers are the same */
+    private boolean isSameProvider(String provider1, String provider2) {
+        if (provider1 == null) {
+          return provider2 == null;
+        }
+        return provider1.equals(provider2);
     }
 
     //  ------------------  LOCATION LISTENER INTERFACE -------------------------
@@ -196,26 +254,31 @@ public class LocationUpdateService extends Service implements LocationListener {
             Toast.makeText(this, "acy:"+location.getAccuracy()+",v:"+location.getSpeed(), Toast.LENGTH_LONG).show();
         }
         
-        lastLocation = location;
+        if(isBetterLocation(location, lastLocation)){
+            Log.d(TAG, "Location is better");
+            lastLocation = location;
+            // send it via bus to activity
+            try{
+            JSONObject loc = new JSONObject();
+                loc.put("latitude", location.getLatitude());
+                loc.put("longitude", location.getLongitude());
+                loc.put("accuracy", location.getAccuracy());
+                loc.put("speed", location.getSpeed());
+                loc.put("bearing", location.getBearing());
+                loc.put("altitude", location.getAltitude());
+                // loc.put("recorded_at", location.getRecordedAt().getTime());
 
-        // send it via bus to activity
-        try{
-        JSONObject loc = new JSONObject();
-            loc.put("latitude", location.getLatitude());
-            loc.put("longitude", location.getLongitude());
-            loc.put("accuracy", location.getAccuracy());
-            loc.put("speed", location.getSpeed());
-            loc.put("bearing", location.getBearing());
-            loc.put("altitude", location.getAltitude());
-            // loc.put("recorded_at", location.getRecordedAt().getTime());
+                EventBus.getDefault().post(loc);
+                Log.d(TAG, "posting to bus");
+                
 
-            EventBus.getDefault().post(loc);
-            Log.d(TAG, "posting to bus");
-            
+            }catch(JSONException e){
+                Log.e(TAG, "could not parse location");
+            }                            
 
-        }catch(JSONException e){
-            Log.e(TAG, "could not parse location");
-        }                            
+        }else{
+            Log.d(TAG, "Location is worse than current");
+        }
     }
 
     public void onProviderDisabled(String provider) {
