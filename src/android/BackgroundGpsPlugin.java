@@ -45,6 +45,10 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
 
     public boolean execute(String action, JSONArray data, CallbackContext callbackContext) {
         Log.d(TAG, "execute / action : " + action);
+        if(data !=null){
+            Log.d(TAG, "execute / data : " + data.toString());
+        }
+
         Activity activity = this.cordova.getActivity();
         Boolean result = false;
         updateServiceIntent = new Intent(activity, LocationUpdateService.class);
