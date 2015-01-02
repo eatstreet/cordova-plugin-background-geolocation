@@ -161,20 +161,23 @@ public class LocationUpdateService extends Service implements LocationListener {
 
         locationManager.removeUpdates(this);
 
-        // final Criteria criteria = new Criteria();
-        // criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        // criteria.setAltitudeRequired(false);
-        // criteria.setBearingRequired(false);
-        // criteria.setPowerRequirement(Criteria.POWER_HIGH);
+        final Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setCostAllowed(true);
 
-        // final String bestProvider = manager.getBestProvider(criteria, true);
+        criteria.setPowerRequirement(Criteria.POWER_HIGH);
 
-        // if (bestProvider != null) {
-        //     Log.d(TAG, "bestProvider found");
-        //     manager.requestLocationUpdates(bestProvider, 0, 0, listener);
-        // }else{
-        //     Log.d(TAG, "bestProvider not found");
-        // }
+        final String bestProvider = locationManager.getBestProvider(criteria, true);
+
+        if (bestProvider != null) {
+            Log.d(TAG, "bestProvider found");
+            locationManager.requestLocationUpdates(bestProvider, 0, 0, listener);
+        }else{
+            Log.d(TAG, "bestProvider not found");
+            Toast.makeText(this, "No location provider found. Have you enabled GPS?", Toast.LENGTH_LONG).show();
+        }
             
         // Turn on each provider aggressively 
         // List<String> matchingProviders = locationManager.getAllProviders();
@@ -184,7 +187,7 @@ public class LocationUpdateService extends Service implements LocationListener {
         //     }
         // }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
 
     private void cleanUp() {
