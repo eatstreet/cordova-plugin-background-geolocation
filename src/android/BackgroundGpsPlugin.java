@@ -79,6 +79,12 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
                 this.notificationText = data.getString(4);                
 
                 this.callback = callbackContext;
+
+                Log.i(TAG, "- minTime: "     + minTime);
+                Log.i(TAG, "- minDistance: "    + minDistance);        
+                Log.i(TAG, "- notificationTitle: "  + notificationTitle);
+                Log.i(TAG, "- notificationText: "   + notificationText);     
+
             } catch (JSONException e) {
                 callbackContext.error("authToken/url required as parameters: " + e.getMessage());
             }

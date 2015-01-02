@@ -67,7 +67,15 @@ public class LocationUpdateService extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Received start id " + startId + ": " + intent);
         if (intent != null) {
-            
+
+            // debug intent values values
+            Bundle bundle = intent.getExtras();
+            for (String key : bundle.keySet()) {
+                Object value = bundle.get(key);
+                Log.d(TAG, String.format("%s %s (%s)", key,  
+                    value.toString(), value.getClass().getName()));
+            }
+
             minDistance = Integer.parseInt(intent.getStringExtra("minDistance"));
             minTime = Integer.parseInt(intent.getStringExtra("minTime"));
             isDebugging = Boolean.parseBoolean(intent.getStringExtra("isDebugging"));
