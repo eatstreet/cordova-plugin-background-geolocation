@@ -173,9 +173,8 @@ public class LocationUpdateService extends Service implements LocationListener {
 
         if (bestProvider != null) {
             Log.d(TAG, "bestProvider found");
-            locationManager.requestLocationUpdates(bestProvider, 0, 0, listener);
+            locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
         }else{
-            Log.d(TAG, "bestProvider not found");
             Toast.makeText(this, "No location provider found. Have you enabled GPS?", Toast.LENGTH_LONG).show();
         }
             
