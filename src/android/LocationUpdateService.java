@@ -4,6 +4,7 @@ import de.greenrobot.event.EventBus;
 
 import java.util.List;
 import java.util.Iterator;
+import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,9 +40,6 @@ public class LocationUpdateService extends Service implements LocationListener {
     
     private Location lastLocation;
 
-    private Integer minDistance = 0;
-    private Integer minTime = 0;
-
     private Boolean isDebugging = false;
         
     private String notificationTitle = "Background checking";
@@ -52,7 +50,6 @@ public class LocationUpdateService extends Service implements LocationListener {
     
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO Auto-generated method stub
         Log.i(TAG, "OnBind" + intent);
         return null;
     }
@@ -79,8 +76,6 @@ public class LocationUpdateService extends Service implements LocationListener {
                     value.toString(), value.getClass().getName()));
             }
 
-            minDistance = Integer.parseInt(intent.getStringExtra("minDistance"));
-            minTime = Integer.parseInt(intent.getStringExtra("minTime"));
             isDebugging = Boolean.parseBoolean(intent.getStringExtra("isDebugging"));
             
             notificationTitle = intent.getStringExtra("notificationTitle");
@@ -104,10 +99,8 @@ public class LocationUpdateService extends Service implements LocationListener {
             }
             notification.flags |= Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE | Notification.FLAG_NO_CLEAR;
             startForeground(startId, notification);
-        }
-            
-        Log.i(TAG, "- minTime: "     + minTime);
-        Log.i(TAG, "- minDistance: "    + minDistance);        
+        }          
+        
         Log.i(TAG, "- notificationTitle: "  + notificationTitle);
         Log.i(TAG, "- notificationText: "   + notificationText);        
 
@@ -153,40 +146,20 @@ public class LocationUpdateService extends Service implements LocationListener {
     }
 
     /**
-     *
-     * @param value set true to engage "aggressive", battery-consuming tracking, false for stationary-region tracking
+     * Start recording aggresively from all found providers
      */
     private void startRecording() {
         Log.i(TAG, "startRecording");                       
 
         locationManager.removeUpdates(this);
-
-        // final Criteria criteria = new Criteria();
-        // criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        // criteria.setAltitudeRequired(false);
-        // criteria.setBearingRequired(false);
-        // criteria.setCostAllowed(true);
-
-        // criteria.setPowerRequirement(Criteria.POWER_HIGH);
-
-        // final String bestProvider = locationManager.getBestProvider(criteria, true);
-
-        // if (bestProvider != null) {
-        //     Log.d(TAG, "bestProvider found");
-        //     locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
-        // }else{
-        //     Toast.makeText(this, "No location provider found. Have you enabled GPS?", Toast.LENGTH_LONG).show();
-        // }
-            
-        // Turn on each provider aggressively 
+           
+        // Turn on all providers aggressively 
         List<String> matchingProviders = locationManager.getAllProviders();
         for (String provider: matchingProviders) {
             if (provider != LocationManager.PASSIVE_PROVIDER) {
                 locationManager.requestLocationUpdates(provider, 0, 0, this);
             }
         }
-
-        // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
 
     private void cleanUp() {
@@ -268,10 +241,10 @@ public class LocationUpdateService extends Service implements LocationListener {
                 loc.put("speed", location.getSpeed());
                 loc.put("bearing", location.getBearing());
                 loc.put("altitude", location.getAltitude());
-                // loc.put("recorded_at", location.getRecordedAt().getTime());
+                loc.put("recorded_at", new Date().getTime());
 
                 EventBus.getDefault().post(loc);
-                Log.d(TAG, "posting to bus");
+                Log.d(TAG, "posting location to bus");
                 
 
             }catch(JSONException e){

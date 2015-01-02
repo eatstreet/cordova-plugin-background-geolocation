@@ -25,14 +25,13 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     private Intent updateServiceIntent;
 
     private Boolean isEnabled = false;
-
-    private String minDistance = "0";
-    private String minTime = "0";
     
     private String isDebugging = "false";
 
     private String notificationTitle = "Background tracking";
     private String notificationText = "ENABLED";
+
+    private String stopOnTerminate = "false";
     
 
     private CallbackContext callback;
@@ -55,8 +54,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
                 
         if (ACTION_START.equalsIgnoreCase(action) && !isEnabled) {
             result = true;
-            updateServiceIntent.putExtra("minTime", minTime);
-            updateServiceIntent.putExtra("minDistance", minDistance);            
+
             updateServiceIntent.putExtra("isDebugging", isDebugging);
             updateServiceIntent.putExtra("notificationTitle", notificationTitle);
             updateServiceIntent.putExtra("notificationText", notificationText);            
@@ -76,18 +74,16 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
                 // Params.
                 //    0       1       2           3               4                5               6            7           8                9               10              11
                 //[params, headers, url, stationaryRadius, distanceFilter, locationTimeout, desiredAccuracy, debug, notificationTitle, notificationText, activityType, stopOnTerminate]
-                this.minDistance = data.getString(4);
-                this.minTime = data.getString(5);
-
+                
                 this.isDebugging = data.getString(7);
                 this.notificationTitle = data.getString(8);
                 this.notificationText = data.getString(9);
-                           
+                this.stopOnTerminate = data.getString(11);                           
 
                 this.callback = callbackContext;
 
-                Log.i(TAG, "- minTime: "     + minTime);
-                Log.i(TAG, "- minDistance: "    + minDistance);        
+                Log.i(TAG, "- stopOnTerminate: "     + stopOnTerminate);
+                Log.i(TAG, "- isDebugging: "    + isDebugging);        
                 Log.i(TAG, "- notificationTitle: "  + notificationTitle);
                 Log.i(TAG, "- notificationText: "   + notificationText);     
 
@@ -106,7 +102,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     public void onDestroy() {
         Activity activity = this.cordova.getActivity();
 
-        if(isEnabled) {
+        if(isEnabled && stopOnTerminate.equalsIgnoreCase("true")) {
             activity.stopService(updateServiceIntent);
         }
     }
