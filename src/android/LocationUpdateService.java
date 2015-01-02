@@ -161,30 +161,30 @@ public class LocationUpdateService extends Service implements LocationListener {
 
         locationManager.removeUpdates(this);
 
-        final Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setAltitudeRequired(false);
-        criteria.setBearingRequired(false);
-        criteria.setCostAllowed(true);
+        // final Criteria criteria = new Criteria();
+        // criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        // criteria.setAltitudeRequired(false);
+        // criteria.setBearingRequired(false);
+        // criteria.setCostAllowed(true);
 
-        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+        // criteria.setPowerRequirement(Criteria.POWER_HIGH);
 
-        final String bestProvider = locationManager.getBestProvider(criteria, true);
+        // final String bestProvider = locationManager.getBestProvider(criteria, true);
 
-        if (bestProvider != null) {
-            Log.d(TAG, "bestProvider found");
-            locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
-        }else{
-            Toast.makeText(this, "No location provider found. Have you enabled GPS?", Toast.LENGTH_LONG).show();
-        }
+        // if (bestProvider != null) {
+        //     Log.d(TAG, "bestProvider found");
+        //     locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
+        // }else{
+        //     Toast.makeText(this, "No location provider found. Have you enabled GPS?", Toast.LENGTH_LONG).show();
+        // }
             
         // Turn on each provider aggressively 
-        // List<String> matchingProviders = locationManager.getAllProviders();
-        // for (String provider: matchingProviders) {
-        //     if (provider != LocationManager.PASSIVE_PROVIDER) {
-        //         locationManager.requestLocationUpdates(provider, 0, 0, this);
-        //     }
-        // }
+        List<String> matchingProviders = locationManager.getAllProviders();
+        for (String provider: matchingProviders) {
+            if (provider != LocationManager.PASSIVE_PROVIDER) {
+                locationManager.requestLocationUpdates(provider, 0, 0, this);
+            }
+        }
 
         // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
