@@ -169,7 +169,7 @@ public class LocationUpdateService extends Service implements LocationListener {
     public void onLocationChanged(Location location) {
         Log.d(TAG, "- onLocationChanged: " + location.getLatitude() + "," + location.getLongitude() + ", accuracy: " + location.getAccuracy() + ", speed: " + location.getSpeed());
         if(isDebugging){            
-            Toast.makeText(this, "acy:"+location.getAccuracy()+",v:"+location.getSpeed()+",df:"+scaledDistanceFilter, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "acy:"+location.getAccuracy()+",v:"+location.getSpeed(), Toast.LENGTH_LONG).show();
         }
         
         lastLocation = location;
