@@ -77,7 +77,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
                 //    0       1       2           3               4                5               6            7           8                9               10              11
                 //[params, headers, url, stationaryRadius, distanceFilter, locationTimeout, desiredAccuracy, debug, notificationTitle, notificationText, activityType, stopOnTerminate]
                 this.minDistance = data.getString(4);
-                this.locationTimeout = data.getString(5);
+                this.minTime = data.getString(5);
 
                 this.isDebugging = data.getString(7);
                 this.notificationTitle = data.getString(8);
