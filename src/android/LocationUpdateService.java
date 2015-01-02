@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -157,14 +158,29 @@ public class LocationUpdateService extends Service implements LocationListener {
         Log.i(TAG, "startRecording");                       
 
         locationManager.removeUpdates(this);
+
+        final Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+
+        final String bestProvider = manager.getBestProvider(criteria, true);
+
+        if (bestProvider != null) {
+            Log.d(TAG, "bestProvider found");
+            manager.requestLocationUpdates(bestProvider, 0, 0, listener);
+        }else{
+            Log.d(TAG, "bestProvider not found");
+        }
             
         // Turn on each provider aggressively 
-        List<String> matchingProviders = locationManager.getAllProviders();
-        for (String provider: matchingProviders) {
-            if (provider != LocationManager.PASSIVE_PROVIDER) {
-                locationManager.requestLocationUpdates(provider, 0, 0, this);
-            }
-        }
+        // List<String> matchingProviders = locationManager.getAllProviders();
+        // for (String provider: matchingProviders) {
+        //     if (provider != LocationManager.PASSIVE_PROVIDER) {
+        //         locationManager.requestLocationUpdates(provider, 0, 0, this);
+        //     }
+        // }
     }
 
     private void cleanUp() {
