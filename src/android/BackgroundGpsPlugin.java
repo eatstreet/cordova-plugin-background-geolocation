@@ -20,7 +20,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
 
     public static final String ACTION_START = "start";
     public static final String ACTION_STOP = "stop";
-    public static final String ACTION_STOP = "configure";
+    public static final String ACTION_CONFIGURE = "configure";
     
     private Intent updateServiceIntent;
 
@@ -94,7 +94,7 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
     public void onDestroy() {
         Activity activity = this.cordova.getActivity();
 
-        if(isEnabled && stopOnTerminate.equalsIgnoreCase("true")) {
+        if(isEnabled) {
             activity.stopService(updateServiceIntent);
         }
     }
