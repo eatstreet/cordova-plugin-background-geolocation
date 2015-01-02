@@ -20,24 +20,20 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
 
     public static final String ACTION_START = "start";
     public static final String ACTION_STOP = "stop";
-    public static final String ACTION_CONFIGURE = "configure";
-    public static final String ACTION_SET_CONFIG = "setConfig";
-
+    public static final String ACTION_STOP = "configure";
+    
     private Intent updateServiceIntent;
 
     private Boolean isEnabled = false;
 
-    private String url;
-    private String params;
-    private String headers;
-    private String stationaryRadius = "30";
-    private String desiredAccuracy = "100";
-    private String distanceFilter = "30";
-    private String locationTimeout = "60";
+    private String minDistance = "0";
+    private String minTime = "0";
+    
     private String isDebugging = "false";
+
     private String notificationTitle = "Background tracking";
     private String notificationText = "ENABLED";
-    private String stopOnTerminate = "false";
+    
 
     private CallbackContext callback;
 
@@ -55,27 +51,15 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
                 
         if (ACTION_START.equalsIgnoreCase(action) && !isEnabled) {
             result = true;
-            if (params == null || headers == null || url == null) {
-                callbackContext.error("Call configure before calling start");
-            } else {
-                // callbackContext.success();
+            updateServiceIntent.putExtra("minTime", minTime);
+            updateServiceIntent.putExtra("minDistance", minDistance);            
+            updateServiceIntent.putExtra("isDebugging", isDebugging);
+            updateServiceIntent.putExtra("notificationTitle", notificationTitle);
+            updateServiceIntent.putExtra("notificationText", notificationText);            
 
-                updateServiceIntent.putExtra("url", url);
-                updateServiceIntent.putExtra("params", params);
-                updateServiceIntent.putExtra("headers", headers);
-                updateServiceIntent.putExtra("stationaryRadius", stationaryRadius);
-                updateServiceIntent.putExtra("desiredAccuracy", desiredAccuracy);
-                updateServiceIntent.putExtra("distanceFilter", distanceFilter);
-                updateServiceIntent.putExtra("locationTimeout", locationTimeout);
-                updateServiceIntent.putExtra("desiredAccuracy", desiredAccuracy);
-                updateServiceIntent.putExtra("isDebugging", isDebugging);
-                updateServiceIntent.putExtra("notificationTitle", notificationTitle);
-                updateServiceIntent.putExtra("notificationText", notificationText);
-                updateServiceIntent.putExtra("stopOnTerminate", stopOnTerminate);
+            activity.startService(updateServiceIntent);
+            isEnabled = true;
 
-                activity.startService(updateServiceIntent);
-                isEnabled = true;
-            }
         } else if (ACTION_STOP.equalsIgnoreCase(action)) {
             isEnabled = false;
             result = true;
@@ -86,27 +70,18 @@ public class BackgroundGpsPlugin extends CordovaPlugin {
             result = true;
             try {
                 // Params.
-                //    0       1       2           3               4                5               6            7           8                9               10              11
-                //[params, headers, url, stationaryRadius, distanceFilter, locationTimeout, desiredAccuracy, debug, notificationTitle, notificationText, activityType, stopOnTerminate]
-                this.params = data.getString(0);
-                this.headers = data.getString(1);
-                this.url = data.getString(2);
-                this.stationaryRadius = data.getString(3);
-                this.distanceFilter = data.getString(4);
-                this.locationTimeout = data.getString(5);
-                this.desiredAccuracy = data.getString(6);
-                this.isDebugging = data.getString(7);
-                this.notificationTitle = data.getString(8);
-                this.notificationText = data.getString(9);
-                this.stopOnTerminate = data.getString(11);
+                //       0         1          2               3                  4
+                //[minDistance, minTime, isDebugging, notificationTitle, notificationText]
+                this.minDistance = data.getString(0);
+                this.minTime = data.getString(1);
+                this.isDebugging = data.getString(2);
+                this.notificationTitle = data.getString(3);
+                this.notificationText = data.getString(4);                
+
                 this.callback = callbackContext;
             } catch (JSONException e) {
                 callbackContext.error("authToken/url required as parameters: " + e.getMessage());
             }
-        } else if (ACTION_SET_CONFIG.equalsIgnoreCase(action)) {
-            result = true;
-            // TODO reconfigure Service
-            callback.success();
         }
 
         return result;
